@@ -72,21 +72,21 @@ jobs:
         run: |
           # Create directory for WASI SDK
           sudo mkdir -p /opt/wasi-sdk
-          
+
           # Set variables for WASI SDK installation
           WASI_OS=linux
           WASI_ARCH=x86_64
           WASI_VERSION=25
           WASI_VERSION_FULL=${WASI_VERSION}.0
-          
+
           # Download and extract WASI SDK
           cd /tmp
           wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_VERSION}/wasi-sdk-${WASI_VERSION_FULL}-${WASI_ARCH}-${WASI_OS}.tar.gz
           sudo tar xvf wasi-sdk-${WASI_VERSION_FULL}-${WASI_ARCH}-${WASI_OS}.tar.gz -C /opt/wasi-sdk --strip-components=1
-          
+
           # Verify installation
           ls -la /opt/wasi-sdk/bin
-          
+
           # Make available in the current job
           echo "WASI_SDK_PATH=/opt/wasi-sdk" >> $GITHUB_ENV
           echo "PATH=/opt/wasi-sdk/bin:$PATH" >> $GITHUB_ENV
@@ -109,11 +109,11 @@ jobs:
         run: |
           # We'll build a "native" perl in order to generate host tools that help cross-compile.
           # This is not the final WASI build—just a standard local build for the host.
-          
+
           mkdir native
           curl -L $URLPERL | tar -xzf - --strip-components=1 --directory=native
           cd native
-          
+
           # Configure for a native static build (on Ubuntu). We keep dynamic loading disabled for simplicity.
           sh +x ./Configure \
             -sde \
@@ -206,7 +206,7 @@ jobs:
             d_wait3='undef'
             d_wait4='undef'
             i_syswait='undef' # This tells perl not to include sys/wait.h
-      
+
             i_grp='define'
             i_pwd='define'
             d_getpwnam='undef'
@@ -233,7 +233,7 @@ jobs:
             d_geteuid='undef'
             d_getgid='undef'
             d_getegid='undef'
-        
+
             uselargefiles='define'
             use64bitint='define'
             useperlio='define'
@@ -305,7 +305,7 @@ jobs:
           chmod +x $WASI_BIN/wasic $WASI_BIN/wasimake $WASI_BIN/wasiconfigure
           export WASI_SDK_PATH=/opt/wasi-sdk
           export PATH="$WASI_BIN:$PATH"
-          
+
           mkdir wasm
           curl -L $URLPERL | tar -xzf - --strip-components=1 --directory=wasm
           cp hintfile_wasi.sh wasm/hints/wasi.sh
@@ -398,7 +398,7 @@ jobs:
             -o zeroperl_unopt \
             -flto=full \
             -O3 \
-            -z stack-size=524288 -Wl,--initial-memory=24772608 \
+            -z stack-size=1048576 -Wl,--initial-memory=24772608 \
             -static \
             -DNO_MATHOMS \
             -D_WASI_EMULATED_PROCESS_CLOCKS -lwasi-emulated-process-clocks \
